@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  adforge:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - CHROMA_DB_PATH=/data/chroma_db
+    volumes:
+      - chroma_data:/data/chroma_db
+    restart: unless-stopped
+
+volumes:
+  chroma_data:

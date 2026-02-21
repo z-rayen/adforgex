@@ -1,0 +1,96 @@
+# ── Environment & Secrets ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+*.env
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+wheels/
+.installed.cfg
+lib/
+lib64/
+MANIFEST
+
+# ── Virtual Environments ──────────────────────────────────────────────────────
+venv/
+env/
+ENV/
+.venv/
+.env/
+myenv/
+
+# ── RAG / ChromaDB (vector database — large binary files) ────────────────────
+chroma_db/
+*.chroma
+*.sqlite3
+
+# ── ML Models (downloaded automatically on first run) ────────────────────────
+# sentence-transformers cache
+.cache/
+models/
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# HuggingFace cache
+huggingface/
+~/.cache/huggingface/
+
+# ── Playwright ────────────────────────────────────────────────────────────────
+.playwright/
+playwright-report/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+*.out
+
+# ── OS Files ──────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── IDEs ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ── Temporary / Upload files ──────────────────────────────────────────────────
+tmp/
+temp/
+uploads/
+*.tmp

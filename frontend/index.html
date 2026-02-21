@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdForge AI — Full Stack</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080810;
+    --surface: #10101c;
+    --surface2: #181828;
+    --border: #252538;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #e8e8f0;
+    --muted: #5b5b7a;
+    --code-bg: #0a0a16;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(108,99,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,99,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 48px 24px; position: relative; z-index: 1; }
+
+  header { margin-bottom: 44px; border-bottom: 1px solid var(--border); padding-bottom: 28px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(108,99,255,0.12); border: 1px solid rgba(108,99,255,0.3);
+    color: var(--accent); font-size: 10px; padding: 3px 10px;
+    border-radius: 100px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800; line-height: 1.05; letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #fff 0%, #b0abff 60%, #6c63ff 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .subtitle { color: var(--muted); font-size: 12.5px; margin-top: 10px; line-height: 1.7; }
+  .server-indicator {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(67,233,123,0.08); border: 1px solid rgba(67,233,123,0.2);
+    color: var(--accent3); font-size: 11px; padding: 4px 12px; border-radius: 6px;
+    margin-top: 10px;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent3); animation: blink 2s infinite; }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px; margin-bottom: 18px;
+    transition: border-color 0.2s;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11.5px;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .sn {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: rgba(108,99,255,0.15); border: 1px solid rgba(108,99,255,0.4);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px; color: var(--accent);
+  }
+  label { display: block; font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; margin-top: 14px; }
+  label:first-of-type { margin-top: 0; }
+  input[type=text], input[type=password], textarea, select {
+    width: 100%; background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 12.5px; padding: 9px 13px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+  }
+  textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
+  select option { background: var(--surface2); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media(max-width:600px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Image upload */
+  .upload-area {
+    border: 2px dashed var(--border); border-radius: 8px; padding: 28px;
+    text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .upload-area:hover, .upload-area.dragover { border-color: var(--accent); background: rgba(108,99,255,0.04); }
+  .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 26px; margin-bottom: 6px; }
+  .upload-text { font-size: 11px; color: var(--muted); line-height: 1.6; }
+  .previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin-top: 14px; }
+  .prev-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .prev-item img { width: 100%; height: 100%; object-fit: cover; }
+  .prev-item .rm { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.75); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* Toggle row */
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+  .toggle { width: 40px; height: 22px; background: var(--border); border-radius: 100px; position: relative; cursor: pointer; transition: background 0.2s; }
+  .toggle.on { background: var(--accent); }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: white; transition: left 0.2s; }
+  .toggle.on::after { left: 21px; }
+  .toggle-label { font-size: 12px; color: var(--muted); }
+
+  /* Pipeline tracker */
+  .pipe-track { display: flex; gap: 0; margin: 20px 0; overflow-x: auto; padding-bottom: 4px; }
+  .ps { flex-shrink: 0; }
+  .ps-label {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; font-size: 10px; padding: 5px 10px; color: var(--muted);
+    letter-spacing: 0.06em; transition: all 0.25s; white-space: nowrap;
+  }
+  .ps-label.active { background: rgba(108,99,255,0.18); border-color: var(--accent); color: var(--accent); animation: pulse-step 1.2s infinite; }
+  .ps-label.done { background: rgba(67,233,123,0.1); border-color: rgba(67,233,123,0.35); color: var(--accent3); }
+  .ps-label.error { background: rgba(255,101,132,0.1); border-color: rgba(255,101,132,0.35); color: var(--accent2); }
+  .ps-arrow { color: var(--border); font-size: 13px; padding: 0 5px; line-height: 30px; }
+  @keyframes pulse-step { 0%,100%{opacity:1} 50%{opacity:.65} }
+
+  /* Run button */
+  .run-btn {
+    width: 100%; padding: 15px; background: var(--accent); border: none;
+    border-radius: 10px; color: white; font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 14px; letter-spacing: 0.05em; cursor: pointer;
+    transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .run-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); transform: translateX(-100%); transition: transform 0.5s; }
+  .run-btn:hover::before { transform: translateX(100%); }
+  .run-btn:hover { background: #7b73ff; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(108,99,255,0.4); }
+  .run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Log panel */
+  .log-panel {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; font-size: 11.5px;
+    max-height: 200px; overflow-y: auto; line-height: 1.9;
+    margin-top: 16px; display: none;
+  }
+  .log-panel.v { display: block; }
+  .ll { display: flex; gap: 10px; }
+  .lt { color: var(--muted); flex-shrink: 0; }
+  .lm.info { color: #a8a0ff; }
+  .lm.success { color: var(--accent3); }
+  .lm.warn { color: #ffd166; }
+  .lm.error { color: var(--accent2); }
+
+  /* Results */
+  .results { display: none; }
+  .results.v { display: block; }
+  .rb { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 14px; }
+  .rh { padding: 12px 18px; background: var(--surface2); border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  .rbody { padding: 18px; }
+  .hook-txt { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 22px; line-height: 1.45; color: #fff; border-left: 3px solid var(--accent); padding-left: 16px; }
+  .cap-txt { font-size: 12.5px; line-height: 1.85; white-space: pre-wrap; color: var(--text); }
+  .cta-chip { display: inline-block; background: var(--accent); color: white; border-radius: 100px; padding: 8px 22px; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 7px; }
+  .tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 4px 11px; font-size: 11.5px; }
+  .tag.pain { border-color: rgba(255,101,132,0.3); color: #ff9eb5; }
+  .tag.feat { border-color: rgba(67,233,123,0.3); color: #8fffbe; }
+  .tag.uc { border-color: rgba(108,99,255,0.3); color: #b0abff; }
+  .strat-box { background: rgba(108,99,255,0.07); border: 1px solid rgba(108,99,255,0.18); border-radius: 8px; padding: 14px; font-size: 12.5px; line-height: 1.75; }
+  .vis-item { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; line-height: 1.5; }
+  .vis-item:last-child { border-bottom: none; }
+  .json-out { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 11.5px; white-space: pre-wrap; overflow-x: auto; color: #a8f0c6; max-height: 380px; overflow-y: auto; line-height: 1.65; }
+  .cp { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: 3px 9px; font-size: 10px; cursor: pointer; font-family: 'DM Mono', monospace; transition: all 0.2s; }
+  .cp:hover { border-color: var(--accent); color: var(--accent); }
+  .ins-section { margin-bottom: 14px; }
+  .ins-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 7px; }
+  .divider { height: 1px; background: var(--border); margin: 30px 0; }
+  .info-tip { background: rgba(108,99,255,0.07); border: 1px solid rgba(108,99,255,0.18); border-radius: 8px; padding: 11px 14px; font-size: 11px; color: #a8a0ff; line-height: 1.65; margin-top: 10px; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="badge">⚡ Full Stack</div>
+  <h1>AdForge Pipeline</h1>
+  <p class="subtitle">RAG + Playwright Scraper + Groq Vision + 6-step AI pipeline → high-conversion ad copy</p>
+  <div class="server-indicator"><span class="dot"></span> Connected to backend at <span id="serverUrl">http://localhost:8000</span></div>
+</header>
+
+<!-- Config -->
+<div class="card">
+  <div class="card-title"><span class="sn">⚙</span> Server & API Config</div>
+  <div class="two-col">
+    <div>
+      <label>Backend URL</label>
+      <input type="text" id="serverBase" value="http://localhost:8000">
+    </div>
+    <div>
+      <label>Groq API Key (optional override)</label>
+      <input type="password" id="apiKeyOverride" placeholder="Leave blank to use server's .env key">
+    </div>
+  </div>
+</div>
+
+<!-- Product -->
+<div class="card">
+  <div class="card-title"><span class="sn">1</span> Product Information</div>
+  <label>Product Description *</label>
+  <textarea id="desc" placeholder="e.g. A pocket-sized UV-C water purifier that kills 99.9% of bacteria in 60 seconds..."></textarea>
+  <div class="two-col" style="margin-top:0">
+    <div>
+      <label>Category *</label>
+      <input type="text" id="cat" placeholder="e.g. Travel Gadgets">
+    </div>
+    <div>
+      <label>Target Audience</label>
+      <input type="text" id="aud" placeholder="e.g. Hikers aged 25-40">
+    </div>
+  </div>
+  <label>Messaging Angle</label>
+  <select id="angle">
+    <option value="auto">🤖 Auto-detect best angle</option>
+    <option value="problem-solution">🔧 Problem → Solution</option>
+    <option value="luxury">💎 Luxury / Premium</option>
+    <option value="ugc">📱 UGC / Authentic</option>
+    <option value="fear">⚠️ Fear / Risk Aversion</option>
+    <option value="social-proof">⭐ Social Proof</option>
+    <option value="discount">💸 Discount / Value</option>
+    <option value="lifestyle">🌅 Lifestyle / Aspiration</option>
+  </select>
+</div>
+
+<!-- Images + Options -->
+<div class="card">
+  <div class="card-title"><span class="sn">2</span> Competitor Images & Scraper Options</div>
+
+  <div class="upload-area" id="uploadArea">
+    <input type="file" id="imgInput" multiple accept="image/*">
+    <div class="upload-icon">📸</div>
+    <div class="upload-text">Drop competitor ad images here or click to browse<br><small>Analyzed by Llama 4 Scout vision model</small></div>
+  </div>
+  <div class="previews" id="previews"></div>
+
+  <div class="toggle-row" style="margin-top:18px;">
+    <div class="toggle on" id="tScrape" onclick="toggleScrape()"></div>
+    <span class="toggle-label">Enable Playwright web scraper (Google, Amazon, Reddit, Facebook Ads)</span>
+  </div>
+  <div class="toggle-row">
+    <div class="toggle on" id="tRag" onclick="toggleRag()"></div>
+    <span class="toggle-label">Enable RAG knowledge base retrieval</span>
+  </div>
+  <div class="info-tip">💡 The scraper requires <code>playwright install chromium</code> on the server. If disabled, the LLM simulates competitor intelligence.</div>
+</div>
+
+<!-- Pipeline tracker -->
+<div class="card" style="padding:16px 20px;">
+  <div class="card-title" style="margin-bottom:10px;"><span class="sn">⚡</span> Pipeline</div>
+  <div class="pipe-track" id="pipeTrack">
+    <div class="ps"><div class="ps-label" id="p1">S1: RAG+Analysis</div></div><div class="ps-arrow">→</div>
+    <div class="ps"><div class="ps-label" id="p2">S2: Competitor</div></div><div class="ps-arrow">→</div>
+    <div class="ps"><div class="ps-label" id="p3">S3: Images</div></div><div class="ps-arrow">→</div>
+    <div class="ps"><div class="ps-label" id="p4">S4: Sentiment</div></div><div class="ps-arrow">→</div>
+    <div class="ps"><div class="ps-label" id="p5">S5: Strategy</div></div><div class="ps-arrow">→</div>
+    <div class="ps"><div class="ps-label" id="p6">S6: Ad Gen</div></div>
+  </div>
+</div>
+
+<button class="run-btn" id="runBtn" onclick="run()">⚡ Run Full Pipeline</button>
+
+<div class="log-panel" id="logs"></div>
+
+<div class="divider" id="divider" style="display:none;"></div>
+
+<!-- Results -->
+<div class="results" id="results">
+  <div style="margin-bottom:20px;">
+    <div class="badge" style="background:rgba(67,233,123,0.08);border-color:rgba(67,233,123,0.25);color:var(--accent3);">✓ Complete</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-top:8px;">Your Ad Package</h2>
+  </div>
+
+  <div class="rb">
+    <div class="rh">Hook <button class="cp" onclick="copy('hookEl')">Copy</button></div>
+    <div class="rbody"><div class="hook-txt" id="hookEl"></div></div>
+  </div>
+
+  <div class="rb">
+    <div class="rh">Caption <button class="cp" onclick="copy('capEl')">Copy</button></div>
+    <div class="rbody"><div class="cap-txt" id="capEl"></div></div>
+  </div>
+
+  <div class="rb">
+    <div class="rh">Call-to-Action</div>
+    <div class="rbody"><div class="cta-chip" id="ctaEl"></div></div>
+  </div>
+
+  <div class="rb">
+    <div class="rh">Visual Recommendations</div>
+    <div class="rbody" id="visEl"></div>
+  </div>
+
+  <div class="rb">
+    <div class="rh">User Insights</div>
+    <div class="rbody" id="insEl"></div>
+  </div>
+
+  <div class="rb">
+    <div class="rh">Strategy</div>
+    <div class="rbody"><div class="strat-box" id="stratEl"></div></div>
+  </div>
+
+  <div class="rb">
+    <div class="rh">Raw JSON <button class="cp" onclick="copyJson()">Copy JSON</button></div>
+    <div class="rbody" style="padding:0;"><div class="json-out" id="jsonEl"></div></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+let images = [];
+let scrapeEnabled = true;
+let ragEnabled = true;
+
+// ── Toggles ──────────────────────────────────────────────────────────────────
+function toggleScrape() {
+  scrapeEnabled = !scrapeEnabled;
+  document.getElementById('tScrape').className = 'toggle' + (scrapeEnabled ? ' on' : '');
+}
+function toggleRag() {
+  ragEnabled = !ragEnabled;
+  document.getElementById('tRag').className = 'toggle' + (ragEnabled ? ' on' : '');
+}
+
+// ── Image upload ──────────────────────────────────────────────────────────────
+const imgInput = document.getElementById('imgInput');
+const uploadArea = document.getElementById('uploadArea');
+const previewsEl = document.getElementById('previews');
+
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); handleFiles([...e.dataTransfer.files]); });
+imgInput.addEventListener('change', () => handleFiles([...imgInput.files]));
+
+function handleFiles(files) {
+  files.filter(f => f.type.startsWith('image/')).forEach(file => {
+    const r = new FileReader();
+    r.onload = e => {
+      const b64 = e.target.result.split(',')[1];
+      images.push({ b64, mime: file.type, dataUrl: e.target.result });
+      renderPreviews();
+    };
+    r.readAsDataURL(file);
+  });
+}
+function renderPreviews() {
+  previewsEl.innerHTML = '';
+  images.forEach((img, i) => {
+    const d = document.createElement('div');
+    d.className = 'prev-item';
+    d.innerHTML = `<img src="${img.dataUrl}"><button class="rm" onclick="removeImg(${i})">×</button>`;
+    previewsEl.appendChild(d);
+  });
+}
+function removeImg(i) { images.splice(i, 1); renderPreviews(); }
+
+// ── Logging ───────────────────────────────────────────────────────────────────
+function log(msg, type = 'info') {
+  const p = document.getElementById('logs');
+  p.classList.add('v');
+  const t = new Date().toLocaleTimeString('en', { hour12: false });
+  const d = document.createElement('div');
+  d.className = 'll';
+  d.innerHTML = `<span class="lt">${t}</span><span class="lm ${type}">${msg}</span>`;
+  p.appendChild(d);
+  p.scrollTop = p.scrollHeight;
+}
+
+// ── Pipeline highlighting ─────────────────────────────────────────────────────
+const pids = ['p1','p2','p3','p4','p5','p6'];
+function setStep(n, status='active') {
+  pids.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (status === 'all-done') { el.className = 'ps-label done'; return; }
+    if (i < n - 1) el.className = 'ps-label done';
+    else if (i === n - 1) el.className = 'ps-label ' + (status === 'error' ? 'error' : 'active');
+    else el.className = 'ps-label';
+  });
+}
+
+// ── Run ───────────────────────────────────────────────────────────────────────
+async function run() {
+  const base = document.getElementById('serverBase').value.trim().replace(/\/$/, '');
+  const desc = document.getElementById('desc').value.trim();
+  const cat = document.getElementById('cat').value.trim();
+  const aud = document.getElementById('aud').value.trim();
+  const angle = document.getElementById('angle').value;
+  const apiKey = document.getElementById('apiKeyOverride').value.trim() || undefined;
+
+  if (!desc) { alert('Product description required'); return; }
+  if (!cat) { alert('Product category required'); return; }
+
+  document.getElementById('serverUrl').textContent = base;
+  document.getElementById('logs').innerHTML = '';
+  document.getElementById('logs').classList.remove('v');
+  document.getElementById('results').classList.remove('v');
+  document.getElementById('divider').style.display = 'none';
+  pids.forEach(id => document.getElementById(id).className = 'ps-label');
+
+  const btn = document.getElementById('runBtn');
+  btn.disabled = true;
+  btn.textContent = '⚙ Pipeline running...';
+
+  const body = {
+    product_description: desc,
+    product_category: cat,
+    target_audience: aud || null,
+    messaging_angle: angle,
+    scrape_competitors: scrapeEnabled,
+    use_rag: ragEnabled,
+    competitor_images_b64: images.map(i => i.b64),
+    image_mime_types: images.map(i => i.mime),
+  };
+
+  // Build URL with optional API key
+  let url = `${base}/api/pipeline/generate/stream`;
+  if (apiKey) url += `?api_key=${encodeURIComponent(apiKey)}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || `HTTP ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (!line.startsWith('data:')) continue;
+        const raw = line.slice(5).trim();
+        if (!raw) continue;
+
+        try {
+          const event = JSON.parse(raw);
+          handleEvent(event);
+        } catch(e) {
+          console.warn('Bad SSE line:', raw);
+        }
+      }
+    }
+
+  } catch (err) {
+    log(`❌ ${err.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Run Full Pipeline';
+  }
+}
+
+function handleEvent(ev) {
+  if (ev.type === 'step') {
+    const icon = ev.status === 'done' ? '✓' : ev.status === 'error' ? '✗' : ev.status === 'warn' ? '⚠' : '→';
+    const type = ev.status === 'done' ? 'success' : ev.status === 'error' ? 'error' : ev.status === 'warn' ? 'warn' : 'info';
+    log(`${icon} [S${ev.step}] ${ev.message}`, type);
+    setStep(ev.step, ev.status === 'error' ? 'error' : 'active');
+  } else if (ev.type === 'complete') {
+    setStep(0, 'all-done');
+    log('🎉 Pipeline complete!', 'success');
+    renderResult(ev.result);
+  } else if (ev.type === 'error') {
+    log(`❌ Error: ${ev.message}`, 'error');
+  }
+}
+
+function renderResult(r) {
+  document.getElementById('hookEl').textContent = r.hook || '';
+  document.getElementById('capEl').textContent = r.caption || '';
+  document.getElementById('ctaEl').textContent = r.cta || '';
+
+  const icons = ['🎨','📐','💡','👤','✨'];
+  document.getElementById('visEl').innerHTML = (r.visual_recommendations||[]).map((v,i) =>
+    `<div class="vis-item"><span>${icons[i]||'•'}</span><span>${v}</span></div>`
+  ).join('');
+
+  const ui = r.user_insights || {};
+  document.getElementById('insEl').innerHTML = `
+    <div class="ins-section"><div class="ins-label">Pain Points</div>
+      <div class="tag-list">${(ui.pain_points||[]).map(p=>`<span class="tag pain">😤 ${p}</span>`).join('')}</div></div>
+    <div class="ins-section"><div class="ins-label">Common Questions</div>
+      <div class="tag-list">${(ui.questions||[]).map(q=>`<span class="tag">❓ ${q}</span>`).join('')}</div></div>
+    <div class="ins-section"><div class="ins-label">Desired Features</div>
+      <div class="tag-list">${(ui.desired_features||[]).map(f=>`<span class="tag feat">✅ ${f}</span>`).join('')}</div></div>
+    <div class="ins-section"><div class="ins-label">Alternative Use Cases</div>
+      <div class="tag-list">${(ui.use_cases||[]).map(u=>`<span class="tag uc">🔍 ${u}</span>`).join('')}</div></div>
+  `;
+  document.getElementById('stratEl').textContent = r.strategy || '';
+  document.getElementById('jsonEl').textContent = JSON.stringify(r, null, 2);
+
+  document.getElementById('divider').style.display = 'block';
+  document.getElementById('results').classList.add('v');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copy(id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    event.target.textContent = '✓';
+    setTimeout(() => event.target.textContent = 'Copy', 1500);
+  });
+}
+function copyJson() {
+  navigator.clipboard.writeText(document.getElementById('jsonEl').textContent).then(() => {
+    event.target.textContent = '✓';
+    setTimeout(() => event.target.textContent = 'Copy JSON', 1500);
+  });
+}
+</script>
+</body>
+</html>
