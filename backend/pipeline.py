@@ -9,7 +9,30 @@ New features:
 import logging
 import asyncio
 import uuid
+import random
 from typing import AsyncGenerator, Dict, Any, Optional, List
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Funny roast messages for image mismatch — {detected} and {product} are filled in
+# ──────────────────────────────────────────────────────────────────────────────
+_MISMATCH_ROASTS = [
+    "Bro really uploaded a {detected} to sell {product}. Bold strategy. Wrong, but bold.",
+    "Plot twist: you're selling {product} but the image is screaming '{detected}'. We're confused. The AI is confused. Everyone is confused.",
+    "We see a {detected}. You described {product}. One of these things is not like the other 🎵",
+    "AI vision walked in, saw a {detected}, saw your '{product}' description, and immediately filed for early retirement.",
+    "That's a lovely {detected} you've got there. Shame it has nothing to do with {product}.",
+    "Sir/Ma'am, this is a {product} ad. WHY is there a {detected} in here?",
+    "Your image: {detected}. Your product: {product}. Your energy: chaotic. We respect it. But no.",
+    "Ad campaign idea: {detected} sells {product}. Rejected. Brilliantly, hilariously rejected.",
+    "The AI looked at your {detected} image, looked at '{product}', looked back at the image... and chose peace. Please fix this.",
+    "Image detected: {detected}. Product expected: {product}. Match found: absolutely not whatsoever.",
+]
+
+def _roast_mismatch(detected: str, product: str) -> str:
+    template = random.choice(_MISMATCH_ROASTS)
+    # Clean up product to first ~40 chars
+    short_product = product.strip()[:40].rstrip(',. ')
+    return template.format(detected=detected, product=short_product)
 
 from backend.models import AdGenerationRequest, AdGenerationResponse, UserInsights
 from backend.config import get_settings
@@ -319,27 +342,82 @@ class AdGenerationPipeline:
                 all_images.append({"b64": img["b64"], "mime": img["mime"]})
 
         if all_images:
-            step3_data = await llm_steps.run_step3_with_images(
-                client,
-                request.product_description,
-                request.product_category,
-                all_images[:5],  # max 5 images for vision model
-            )
-            images_analyzed = len(all_images[:5])
+            # ── VALIDATION: ensure uploaded images match the product ──────
+            user_uploaded = []
+            if request.competitor_images_b64:
+                mimes_for_check = request.image_mime_types or ["image/jpeg"] * len(request.competitor_images_b64)
+                user_uploaded = [
+                    {"b64": b64, "mime": mime}
+                    for b64, mime in zip(request.competitor_images_b64, mimes_for_check)
+                ]
 
-            # ── AUTO-SAVE visual analysis to RAG ─────────────────────────
-            if request.use_rag and self.rag and isinstance(step3_data, dict):
-                rag_saved_from_images = self._save_visual_analysis_to_rag(
-                    category=request.product_category,
-                    description=request.product_description,
-                    visual_data=step3_data,
+            if user_uploaded:
+                validation = await llm_steps.run_step3_validate(
+                    client,
+                    request.product_description,
+                    request.product_category,
+                    user_uploaded[:5],
                 )
+                overall_match = validation.get("overall_match", True)
 
-            yield emit(3, "Image Analysis", "done",
-                       f"Analyzed {images_analyzed} images "
-                       f"({len(request.competitor_images_b64 or [])} uploaded + "
-                       f"{len(scraped_images)} scraped). "
-                       f"Saved {rag_saved_from_images} visual docs to RAG.")
+                if not overall_match:
+                    # Pick the first mismatched image's detected subject for the roast
+                    bad_images = [
+                        img for img in validation.get("per_image", [])
+                        if not img.get("matches_product", True)
+                    ]
+                    detected_subject = (
+                        bad_images[0].get("detected_subject", "something totally unrelated")
+                        if bad_images else "something totally unrelated"
+                    )
+                    roast = _roast_mismatch(detected_subject, request.product_description)
+
+                    # 1. Regular step event — always hits the log regardless of buffering
+                    yield emit(3, "Image Analysis", "error", f"🎭 {roast}")
+                    # 2. Structured event — powers the banner in the frontend
+                    yield {
+                        "type": "image_mismatch",
+                        "step": 3,
+                        "step_name": "Image Analysis",
+                        "status": "error",
+                        "message": roast,
+                        "detected": detected_subject,
+                        "product": request.product_description[:80],
+                    }
+                    # 3. Ping — forces the buffer to flush before the connection closes
+                    yield {"type": "ping"}
+                    return  # ← STOP the pipeline entirely
+
+            if all_images:
+                step3_data = await llm_steps.run_step3_with_images(
+                    client,
+                    request.product_description,
+                    request.product_category,
+                    all_images[:5],  # max 5 images for vision model
+                )
+                images_analyzed = len(all_images[:5])
+
+                # ── AUTO-SAVE visual analysis to RAG ─────────────────────────
+                if request.use_rag and self.rag and isinstance(step3_data, dict):
+                    rag_saved_from_images = self._save_visual_analysis_to_rag(
+                        category=request.product_category,
+                        description=request.product_description,
+                        visual_data=step3_data,
+                    )
+
+                yield emit(3, "Image Analysis", "done",
+                           f"Analyzed {images_analyzed} images "
+                           f"({len(request.competitor_images_b64 or [])} uploaded + "
+                           f"{len(scraped_images)} scraped). "
+                           f"Saved {rag_saved_from_images} visual docs to RAG.")
+            else:
+                step3_data = await llm_steps.run_step3_fallback(
+                    client,
+                    request.product_description,
+                    request.product_category,
+                )
+                yield emit(3, "Image Analysis", "done",
+                           "No images to analyze — generated visual recommendations via LLM.")
         else:
             step3_data = await llm_steps.run_step3_fallback(
                 client,

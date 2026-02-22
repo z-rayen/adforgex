@@ -62,6 +62,32 @@ async def run_step3_with_images(
         return await run_step3_fallback(client, description, category)
 
 
+async def run_step3_validate(
+    client: GroqClient,
+    description: str,
+    category: str,
+    images: List[Dict[str, str]],
+) -> Dict[str, Any]:
+    """
+    Step 3 pre-check — verify that the uploaded images actually match
+    the described product before running full image analysis.
+    Returns a dict with keys: overall_match (bool), per_image, summary.
+    """
+    logger.info(f"Step 3 validation: checking {len(images)} image(s) against product description")
+    prompt = prompts.step3_validate_image_match(description, category)
+    try:
+        result = await client.vision_json(prompt, images)
+        logger.info(
+            f"Step 3 validation done: overall_match={result.get('overall_match')}, "
+            f"confidence={result.get('overall_confidence')}"
+        )
+        return result
+    except Exception as e:
+        logger.warning(f"Step 3 validation failed ({e}), skipping validation")
+        # If validation itself errors, we allow the pipeline to continue (fail open)
+        return {"overall_match": True, "summary": "Validation unavailable", "per_image": []}
+
+
 async def run_step3_fallback(
     client: GroqClient,
     description: str,

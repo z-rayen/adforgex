@@ -1,0 +1,89 @@
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+    transition: border-color 0.2s;
+}
+
+.cardTitle {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sn {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(108, 99, 255, 0.15);
+    border: 1px solid rgba(108, 99, 255, 0.4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--accent);
+}
+
+.pipeTrack {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.ps {
+    flex-shrink: 0;
+}
+
+.psLabel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 10px;
+    padding: 5px 10px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    transition: all 0.25s;
+    white-space: nowrap;
+}
+
+.psLabel.active {
+    background: rgba(108, 99, 255, 0.18);
+    border-color: var(--accent);
+    color: var(--accent);
+    animation: pulse-step 1.2s infinite;
+}
+
+.psLabel.done {
+    background: rgba(67, 233, 123, 0.1);
+    border-color: rgba(67, 233, 123, 0.35);
+    color: var(--accent3);
+}
+
+.psLabel.error {
+    background: rgba(255, 101, 132, 0.1);
+    border-color: rgba(255, 101, 132, 0.35);
+    color: var(--accent2);
+}
+
+.psLabel.warn {
+    background: rgba(255, 200, 80, 0.12);
+    border-color: rgba(255, 200, 80, 0.45);
+    color: #f5c842;
+}
+
+.psArrow {
+    color: var(--border);
+    font-size: 13px;
+    padding: 0 5px;
+    line-height: 30px;
+}

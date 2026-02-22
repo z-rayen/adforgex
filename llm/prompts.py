@@ -128,6 +128,46 @@ Respond in JSON:
 }}"""
 
 
+def step3_validate_image_match(product_description: str, product_category: str) -> str:
+    """
+    Vision prompt to verify that the uploaded image(s) actually match the described product.
+    Returns a structured JSON with match status and detected product.
+    """
+    return f"""You are a visual quality-control assistant for an ad generation platform.
+
+Your job is to verify that the uploaded image(s) are relevant to the product the user described.
+
+DESCRIBED PRODUCT: {product_description}
+PRODUCT CATEGORY: {product_category}
+
+For EACH image provided, examine it carefully and answer:
+1. What product or object is actually shown in the image?
+2. Does it match or relate to the described product / category?
+3. How confident are you (0–10)?
+
+Then give an overall verdict across all images.
+
+Respond ONLY in this JSON format:
+{{
+  "per_image": [
+    {{
+      "image_index": 0,
+      "detected_subject": "short description of what is shown",
+      "matches_product": true,
+      "confidence": 8,
+      "mismatch_reason": ""
+    }}
+  ],
+  "overall_match": true,
+  "overall_confidence": 8,
+  "mismatched_images": [],
+  "summary": "One sentence: images match / do not match the described product."
+}}
+
+If the image is mismatched, set matches_product to false and fill mismatch_reason with a clear explanation (e.g. 'Image shows a watch but product is described as coffee').
+Set overall_match to false if ANY image does not match."""
+
+
 def step3_visual_fallback(description: str, category: str) -> str:
     """Used when no images are provided."""
     return f"""You are a visual creative director. Based on your expertise in {category} advertising,
