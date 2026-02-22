@@ -1,7 +1,85 @@
+.wrapper {
+    margin-bottom: 18px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color 0.2s;
+}
+
+.wrapper:hover {
+    border-color: rgba(108, 99, 255, 0.35);
+}
+
+.toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: none;
+    border: none;
+    padding: 14px 18px;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s, background 0.2s;
+}
+
+.toggle:hover {
+    color: var(--accent);
+    background: rgba(108, 99, 255, 0.04);
+}
+
+.toggleLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toggleIcon {
+    font-size: 13px;
+}
+
+.chevron {
+    font-size: 20px;
+    display: inline-block;
+    transform: rotate(0deg);
+    transition: transform 0.25s ease;
+    color: var(--muted);
+    line-height: 1;
+}
+
+.chevronOpen {
+    transform: rotate(90deg);
+}
+
+.panel {
+    padding: 0 18px 18px;
+    border-top: 1px solid var(--border);
+    animation: panelOpen 0.2s ease-out;
+}
+
+@keyframes panelOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .twoCol {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
+    margin-top: 16px;
 }
 
 @media (max-width: 600px) {
@@ -12,46 +90,27 @@
 
 .label {
     display: block;
-    font-size: 10.5px;
+    font-size: 10px;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: 5px;
-    margin-top: 14px;
 }
 
-.label:first-of-type {
-    margin-top: 0;
-}
-
-.input,
-.textarea,
-.select {
+.input {
     width: 100%;
     background: var(--code-bg);
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 7px;
     color: var(--text);
     font-family: 'DM Mono', monospace;
-    font-size: 12.5px;
-    padding: 9px 13px;
+    font-size: 12px;
+    padding: 8px 12px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.input:focus,
-.textarea:focus,
-.select:focus {
+.input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
-}
-
-.textarea {
-    resize: vertical;
-    min-height: 88px;
-    line-height: 1.6;
-}
-
-.select option {
-    background: var(--surface2);
 }

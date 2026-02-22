@@ -189,7 +189,7 @@ function App() {
     return (
         <div className={styles.app}>
             <div className={styles.wrap}>
-                <Header serverUrl={serverBase} />
+                <Header />
 
                 <ConfigCard
                     serverBase={serverBase}

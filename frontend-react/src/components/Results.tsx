@@ -10,164 +10,123 @@ const Results: React.FC<ResultsProps> = ({ result }) => {
     const [copied, setCopied] = useState<string | null>(null);
 
     useEffect(() => {
-        // Scroll to results on mount
-        const element = document.getElementById('results-section');
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        const el = document.getElementById('results-section');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, []);
 
-    const copyToClipboard = (text: string, id: string) => {
+    const copy = (text: string, id: string) => {
         navigator.clipboard.writeText(text).then(() => {
             setCopied(id);
-            setTimeout(() => setCopied(null), 1500);
+            setTimeout(() => setCopied(null), 1800);
         });
     };
 
-    const icons = ['🎨', '📐', '💡', '👤', '✨'];
+    const visIcons = ['🎨', '📌', '✨', '👁️', '🔥'];
 
     return (
         <div id="results-section" className={styles.results}>
-            <div className={styles.resultsHeader}>
-                <div className={styles.badge}>✓ Complete</div>
-                <h2 className={styles.title}>Your Ad Package</h2>
+
+            {/* ── Badge ── */}
+            <div className={styles.topRow}>
+                <span className={styles.badge}>✓ Generated</span>
+                <span className={styles.subBadge}>6 / 6 steps complete</span>
             </div>
 
-            {/* Hook */}
-            <div className={styles.rb}>
-                <div className={styles.rh}>
-                    Hook
-                    <button
-                        className={styles.cp}
-                        onClick={() => copyToClipboard(result.hook, 'hook')}
-                    >
-                        {copied === 'hook' ? '✓' : 'Copy'}
+            {/* ── Hook — HERO ── */}
+            <div className={styles.hookHero}>
+                <div className={styles.hookEyebrow}>Hook</div>
+                <blockquote className={styles.hookText}>{result.hook}</blockquote>
+                <button className={styles.copyBtn} onClick={() => copy(result.hook, 'hook')}>
+                    {copied === 'hook' ? '✓ Copied' : '📋 Copy Hook'}
+                </button>
+            </div>
+
+            {/* ── CTA pill ── */}
+            <div className={styles.ctaRow}>
+                <span className={styles.ctaEyebrow}>Call to Action</span>
+                <div className={styles.ctaPill}>{result.cta}</div>
+            </div>
+
+            {/* ── Caption ── */}
+            <div className={styles.block}>
+                <div className={styles.blockHeader}>
+                    <span className={styles.blockTitle}>Caption</span>
+                    <button className={styles.copyBtn} onClick={() => copy(result.caption, 'caption')}>
+                        {copied === 'caption' ? '✓ Copied' : '📋 Copy'}
                     </button>
                 </div>
-                <div className={styles.rbody}>
-                    <div className={styles.hookTxt}>{result.hook}</div>
-                </div>
+                <div className={styles.captionBox}>{result.caption}</div>
             </div>
 
-            {/* Caption */}
-            <div className={styles.rb}>
-                <div className={styles.rh}>
-                    Caption
-                    <button
-                        className={styles.cp}
-                        onClick={() => copyToClipboard(result.caption, 'caption')}
-                    >
-                        {copied === 'caption' ? '✓' : 'Copy'}
-                    </button>
-                </div>
-                <div className={styles.rbody}>
-                    <div className={styles.capTxt}>{result.caption}</div>
-                </div>
-            </div>
-
-            {/* CTA */}
-            <div className={styles.rb}>
-                <div className={styles.rh}>Call-to-Action</div>
-                <div className={styles.rbody}>
-                    <div className={styles.ctaChip}>{result.cta}</div>
-                </div>
-            </div>
-
-            {/* Visual Recommendations */}
-            <div className={styles.rb}>
-                <div className={styles.rh}>Visual Recommendations</div>
-                <div className={styles.rbody}>
-                    {result.visual_recommendations?.map((rec, i) => (
-                        <div key={i} className={styles.visItem}>
-                            <span>{icons[i] || '•'}</span>
-                            <span>{rec}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* User Insights */}
-            <div className={styles.rb}>
-                <div className={styles.rh}>User Insights</div>
-                <div className={styles.rbody}>
-                    {result.user_insights?.pain_points && result.user_insights.pain_points.length > 0 && (
-                        <div className={styles.insSection}>
-                            <div className={styles.insLabel}>Pain Points</div>
-                            <div className={styles.tagList}>
-                                {result.user_insights.pain_points.map((p, i) => (
-                                    <span key={i} className={`${styles.tag} ${styles.pain}`}>
-                                        😤 {p}
-                                    </span>
-                                ))}
+            {/* ── Visual Recs ── */}
+            {result.visual_recommendations?.length > 0 && (
+                <div className={styles.block}>
+                    <div className={styles.blockHeader}>
+                        <span className={styles.blockTitle}>Visual Recommendations</span>
+                    </div>
+                    <div className={styles.visGrid}>
+                        {result.visual_recommendations.map((rec, i) => (
+                            <div key={i} className={styles.visCard}>
+                                <span className={styles.visNum}>{visIcons[i] ?? '•'}</span>
+                                <span>{rec}</span>
                             </div>
-                        </div>
-                    )}
-
-                    {result.user_insights?.questions && result.user_insights.questions.length > 0 && (
-                        <div className={styles.insSection}>
-                            <div className={styles.insLabel}>Common Questions</div>
-                            <div className={styles.tagList}>
-                                {result.user_insights.questions.map((q, i) => (
-                                    <span key={i} className={styles.tag}>
-                                        ❓ {q}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {result.user_insights?.desired_features &&
-                        result.user_insights.desired_features.length > 0 && (
-                            <div className={styles.insSection}>
-                                <div className={styles.insLabel}>Desired Features</div>
-                                <div className={styles.tagList}>
-                                    {result.user_insights.desired_features.map((f, i) => (
-                                        <span key={i} className={`${styles.tag} ${styles.feat}`}>
-                                            ✅ {f}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                    {result.user_insights?.use_cases && result.user_insights.use_cases.length > 0 && (
-                        <div className={styles.insSection}>
-                            <div className={styles.insLabel}>Alternative Use Cases</div>
-                            <div className={styles.tagList}>
-                                {result.user_insights.use_cases.map((u, i) => (
-                                    <span key={i} className={`${styles.tag} ${styles.uc}`}>
-                                        🔍 {u}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Strategy */}
-            <div className={styles.rb}>
-                <div className={styles.rh}>Strategy</div>
-                <div className={styles.rbody}>
+            {/* ── Strategy ── */}
+            {result.strategy && (
+                <div className={styles.block}>
+                    <div className={styles.blockHeader}>
+                        <span className={styles.blockTitle}>Strategy</span>
+                    </div>
                     <div className={styles.stratBox}>{result.strategy}</div>
                 </div>
-            </div>
+            )}
 
-            {/* Raw JSON */}
-            <div className={styles.rb}>
-                <div className={styles.rh}>
-                    Raw JSON
-                    <button
-                        className={styles.cp}
-                        onClick={() => copyToClipboard(JSON.stringify(result, null, 2), 'json')}
-                    >
-                        {copied === 'json' ? '✓' : 'Copy JSON'}
-                    </button>
+            {/* ── User Insights ── */}
+            {result.user_insights && (
+                <div className={styles.block}>
+                    <div className={styles.blockHeader}>
+                        <span className={styles.blockTitle}>User Insights</span>
+                    </div>
+                    <div className={styles.insightsGrid}>
+                        {result.user_insights.pain_points?.length > 0 && (
+                            <div className={styles.insGroup}>
+                                <div className={styles.insGroupLabel}>💢 Pain Points</div>
+                                {result.user_insights.pain_points.map((p, i) => (
+                                    <div key={i} className={`${styles.insItem} ${styles.pain}`}>{p}</div>
+                                ))}
+                            </div>
+                        )}
+                        {result.user_insights.desired_features?.length > 0 && (
+                            <div className={styles.insGroup}>
+                                <div className={styles.insGroupLabel}>✅ Desired Features</div>
+                                {result.user_insights.desired_features.map((f, i) => (
+                                    <div key={i} className={`${styles.insItem} ${styles.feat}`}>{f}</div>
+                                ))}
+                            </div>
+                        )}
+                        {result.user_insights.questions?.length > 0 && (
+                            <div className={styles.insGroup}>
+                                <div className={styles.insGroupLabel}>❓ Questions</div>
+                                {result.user_insights.questions.map((q, i) => (
+                                    <div key={i} className={`${styles.insItem} ${styles.ques}`}>{q}</div>
+                                ))}
+                            </div>
+                        )}
+                        {result.user_insights.use_cases?.length > 0 && (
+                            <div className={styles.insGroup}>
+                                <div className={styles.insGroupLabel}>🔍 Use Cases</div>
+                                {result.user_insights.use_cases.map((u, i) => (
+                                    <div key={i} className={`${styles.insItem} ${styles.uc}`}>{u}</div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className={styles.rbody} style={{ padding: 0 }}>
-                    <div className={styles.jsonOut}>{JSON.stringify(result, null, 2)}</div>
-                </div>
-            </div>
+            )}
         </div>
     );
 };

@@ -1,21 +1,18 @@
 import React from 'react';
 import styles from './Header.module.css';
 
-interface HeaderProps {
-    serverUrl: string;
-}
-
-const Header: React.FC<HeaderProps> = ({ serverUrl }) => {
+const Header: React.FC = () => {
     return (
         <header className={styles.header}>
-            <div className={styles.badge}>⚡ Full Stack</div>
-            <h1 className={styles.title}>AdForge Pipeline</h1>
-            <p className={styles.subtitle}>
-                RAG + Playwright Scraper + Groq Vision + 6-step AI pipeline → high-conversion ad copy
-            </p>
-            <div className={styles.serverIndicator}>
-                <span className={styles.dot}></span>
-                Connected to backend at <span>{serverUrl}</span>
+            <div className={styles.glow} />
+            <div className={styles.inner}>
+                <div className={styles.badge}>⚡ AI-Powered</div>
+                <h1 className={styles.title}>
+                    Ad<span className={styles.forge}>Forge</span>
+                </h1>
+                <p className={styles.subtitle}>
+                    RAG · Vision · Scraper · 6-step pipeline — from product to high-conversion ad copy
+                </p>
             </div>
         </header>
     );

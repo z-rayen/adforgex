@@ -1,32 +1,271 @@
 .results {
     animation: fadeIn 0.5s ease-out;
+    padding-top: 8px;
 }
 
-.resultsHeader {
-    margin-bottom: 20px;
+.topRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
 }
 
 .badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(67, 233, 123, 0.08);
-    border: 1px solid rgba(67, 233, 123, 0.25);
+    background: rgba(67, 233, 123, 0.1);
+    border: 1px solid rgba(67, 233, 123, 0.3);
     color: var(--accent3);
     font-size: 10px;
-    padding: 3px 10px;
+    padding: 4px 12px;
     border-radius: 100px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    margin-bottom: 8px;
 }
 
-.title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-top: 8px;
+.subBadge {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
+
+/* ── Hook Hero ── */
+.hookHero {
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.08) 0%, rgba(255, 101, 132, 0.06) 100%);
+    border: 1px solid rgba(108, 99, 255, 0.2);
+    border-left: 4px solid var(--accent);
+    border-radius: 14px;
+    padding: 28px 28px 22px;
+    margin-bottom: 16px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.hookEyebrow {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+}
+
+.hookText {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: clamp(20px, 3vw, 26px);
+    line-height: 1.4;
+    color: #fff;
+    margin: 0 0 18px;
+    border: none;
+    padding: 0;
+}
+
+/* ── CTA row ── */
+.ctaRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.ctaEyebrow {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+}
+
+.ctaPill {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent), #9c95ff);
+    color: white;
+    border-radius: 100px;
+    padding: 10px 28px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.35);
+    transition: all 0.2s;
+}
+
+.ctaPill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(108, 99, 255, 0.45);
+}
+
+/* ── Generic block ── */
+.block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.block:hover {
+    border-color: rgba(108, 99, 255, 0.25);
+}
+
+.blockHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 18px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+}
+
+.blockTitle {
+    font-family: 'Syne', sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+/* ── Caption ── */
+.captionBox {
+    padding: 18px;
+    font-size: 12.5px;
+    line-height: 1.85;
+    white-space: pre-wrap;
+    color: var(--text);
+}
+
+/* ── Visual recs grid ── */
+.visGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+}
+
+@media (max-width: 600px) {
+    .visGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.visCard {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 14px 18px;
+    background: var(--surface);
+    font-size: 12px;
+    line-height: 1.55;
+    transition: background 0.2s;
+}
+
+.visCard:hover {
+    background: var(--surface2);
+}
+
+.visNum {
+    font-size: 16px;
+    flex-shrink: 0;
+    line-height: 1.2;
+}
+
+/* ── Strategy ── */
+.stratBox {
+    padding: 18px;
+    background: rgba(108, 99, 255, 0.05);
+    font-size: 12.5px;
+    line-height: 1.8;
+    color: var(--text);
+    font-style: italic;
+    border-left: 3px solid rgba(108, 99, 255, 0.4);
+}
+
+/* ── Insights grid ── */
+.insightsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+}
+
+@media (max-width: 600px) {
+    .insightsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.insGroup {
+    background: var(--surface);
+    padding: 16px 18px;
+}
+
+.insGroupLabel {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+}
+
+.insItem {
+    font-size: 11.5px;
+    line-height: 1.5;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+
+.insItem:last-child {
+    border-bottom: none;
+}
+
+.insItem.pain {
+    color: #ff9eb5;
+}
+
+.insItem.feat {
+    color: #8fffbe;
+}
+
+.insItem.ques {
+    color: #b0abff;
+}
+
+.insItem.uc {
+    color: #ffe08a;
+}
+
+/* ── Copy button ── */
+.copyBtn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 4px 11px;
+    font-size: 10px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+}
+
+.copyBtn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.copyBtn:active {
+    transform: scale(0.95);
+}
+
 
 .rb {
     background: var(--surface);
