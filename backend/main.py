@@ -37,6 +37,8 @@ from backend.models import HealthResponse
 from backend.pipeline import AdGenerationPipeline
 from backend.routers.pipeline_router import router as pipeline_router
 from backend.routers.rag_router import router as rag_router
+from backend.routers.auth_router import router as auth_router
+from backend.database import init_db
 from rag.rag_engine import RAGEngine
 
 # ─────────────────────────────────────────────────
@@ -60,6 +62,10 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("AdForge starting up...")
+
+    # Initialize SQLite database (users + history)
+    init_db()
+    logger.info("SQLite DB initialized")
 
     # Initialize RAG engine
     rag_engine = RAGEngine(
@@ -112,6 +118,7 @@ app.add_middleware(
 )
 
 # Routers
+app.include_router(auth_router)
 app.include_router(pipeline_router)
 app.include_router(rag_router)
 

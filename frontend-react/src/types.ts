@@ -62,3 +62,26 @@ export interface LogEntry {
 
 export type PipelineStep = 1 | 2 | 3 | 4 | 5 | 6;
 export type StepStatus = 'inactive' | 'active' | 'done' | 'error' | 'warn';
+
+// ── Auth ──────────────────────────────────────────
+export interface AuthUser {
+    id: number;
+    username: string;
+    email: string;
+    avatar_color: string;
+    created_at: string;
+    total_predictions?: number;
+}
+
+export interface HistoryItem {
+    id: number;
+    product_description: string;
+    product_category: string;
+    target_audience: string | null;
+    messaging_angle: string;
+    result: PipelineResult;
+    created_at: string;
+    rag_patterns: number;
+    scraper_results: number;
+}
+
