@@ -210,9 +210,3 @@ The pipeline streams real-time step updates via Server-Sent Events, then deliver
 6. **Ad Generation** — Produces a final hook, caption, CTA, and visual recommendations
 
 Each completed run automatically saves scraped ads and image descriptions back into the RAG knowledge base, improving future outputs over time.
-
----
-
-## 📝 License
-
-MIT License — see `LICENSE` for details.
