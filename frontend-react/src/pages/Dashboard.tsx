@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { HistoryItem } from '../types';
 import styles from './Dashboard.module.css';
@@ -16,7 +16,7 @@ export default function Dashboard({ serverBase, onGoToForge }: DashboardProps) {
     const [deleting, setDeleting] = useState<number | null>(null);
     const [stats, setStats] = useState({ total: 0 });
 
-    const fetchHistory = async () => {
+    const fetchHistory = useCallback(async () => {
         setLoading(true);
         try {
             const base = serverBase.replace(/\/$/, '');
@@ -32,11 +32,11 @@ export default function Dashboard({ serverBase, onGoToForge }: DashboardProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [serverBase, token]);
 
     useEffect(() => {
         fetchHistory();
-    }, [serverBase, token]);
+    }, [fetchHistory]);
 
     const deleteItem = async (id: number) => {
         setDeleting(id);

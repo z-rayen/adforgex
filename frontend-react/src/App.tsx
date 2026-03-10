@@ -131,8 +131,8 @@ function ForgeApp({ token, user, onDashboard, onLogout }: ForgeAppProps) {
             let buffer = '';
             let aborted = false;
 
-            let reading = true;
-            while (reading) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            while (true) {
                 const { value, done } = await reader.read();
                 if (done || aborted) break;
                 buffer += decoder.decode(value, { stream: true });
