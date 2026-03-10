@@ -129,12 +129,13 @@ function ForgeApp({ token, user, onDashboard, onLogout }: ForgeAppProps) {
             if (!reader) throw new Error('No response body');
             const decoder = new TextDecoder();
             let buffer = '';
-            let aborted = false;
+            let done = false;
 
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done || aborted) break;
+            while (!done) {
+                const result = await reader.read();
+                done = result.done || false;
+                const { value } = result;
+                if (done) break;
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n');
                 buffer = lines.pop() || '';
@@ -145,7 +146,7 @@ function ForgeApp({ token, user, onDashboard, onLogout }: ForgeAppProps) {
                     try {
                         const event: SSEEvent = JSON.parse(raw);
                         const shouldAbort = handleSSEEvent(event);
-                        if (shouldAbort) { aborted = true; reader.cancel(); break; }
+                        if (shouldAbort) { reader.cancel(); break; }
                     } catch (e) { console.warn('Bad SSE line:', raw); }
                 }
             }
