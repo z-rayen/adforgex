@@ -16,10 +16,6 @@ export default function Dashboard({ serverBase, onGoToForge }: DashboardProps) {
     const [deleting, setDeleting] = useState<number | null>(null);
     const [stats, setStats] = useState({ total: 0 });
 
-    useEffect(() => {
-        fetchHistory();
-    }, []);
-
     const fetchHistory = async () => {
         setLoading(true);
         try {
@@ -37,6 +33,10 @@ export default function Dashboard({ serverBase, onGoToForge }: DashboardProps) {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchHistory();
+    }, [serverBase, token]);
 
     const deleteItem = async (id: number) => {
         setDeleting(id);

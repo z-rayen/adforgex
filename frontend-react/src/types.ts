@@ -29,6 +29,7 @@ export interface PipelineResult {
         use_cases: string[];
     };
     strategy: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
 }
 
