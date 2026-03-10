@@ -131,7 +131,8 @@ function ForgeApp({ token, user, onDashboard, onLogout }: ForgeAppProps) {
             let buffer = '';
             let aborted = false;
 
-            while (true) {
+            let reading = true;
+while (reading) {
                 const { value, done } = await reader.read();
                 if (done || aborted) break;
                 buffer += decoder.decode(value, { stream: true });
