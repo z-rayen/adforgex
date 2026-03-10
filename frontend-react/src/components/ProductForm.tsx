@@ -1,7 +1,7 @@
 import React from 'react';
 import Card from './Card';
 import styles from './ProductForm.module.css';
-import { MessagingAngle } from '../types';
+
 
 interface ProductFormProps {
     productDescription: string;

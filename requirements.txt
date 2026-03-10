@@ -23,7 +23,7 @@ sentence-transformers>=3.0.1
 
 # numpy — 2.x has wheels for Python 3.12+
 numpy>=2.1
-
+pandas>=2.0.0
 # Scraping
 playwright>=1.44.0
 beautifulsoup4>=4.12.3
