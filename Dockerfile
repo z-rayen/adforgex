@@ -24,6 +24,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
+    # Force CPU-only PyTorch FIRST — prevents downloading 2GB+ of NVIDIA CUDA drivers
+    # sentence-transformers pulls torch, which defaults to CUDA version without this
+    pip install --prefix=/install --no-cache-dir \
+        torch==2.3.1+cpu \
+        torchvision==0.18.1+cpu \
+        --index-url https://download.pytorch.org/whl/cpu && \
     pip install --prefix=/install --no-cache-dir -r requirements.txt
 
 
