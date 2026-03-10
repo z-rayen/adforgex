@@ -12,7 +12,7 @@ AdForgeX combines a **6-step LLM pipeline**, **RAG-based knowledge retrieval**, 
 - **RAG Knowledge Base** — ChromaDB-powered retrieval of high-performing ad patterns that grows richer with every run
 - **Competitor Scraping** — Automatically scrapes competitor product listings and reviews to inform ad strategy
 - **Vision Analysis** — Analyzes uploaded product images using a multimodal LLM (Llama 4 Scout) to extract visual selling points
-- **Image Validation** — Detects image/product mismatches before running the full pipeline (with humorous feedback 😄)
+- **Image Validation** — Detects image/product mismatches before running the full pipeline 
 - **Auth System** — JWT-based user authentication with SQLite storage
 - **Real-Time Progress** — Server-Sent Events (SSE) stream pipeline step updates live to the frontend
 - **React Frontend** — Clean dashboard built with React + TypeScript + Vite, served by the FastAPI backend
