@@ -4,15 +4,11 @@ backend/main.py — FastAPI application entry point
 Startup:
   - Initializes ChromaDB RAG engine
   - Creates pipeline instance
-  - Mounts static frontend
+  - Mounts React frontend (frontend-react/dist/)
   - Registers all routers
 
 Run:
   uvicorn backend.main:app --reload --port 8000
-"""
-"""
-backend/main.py — FastAPI application entry point
-...
 """
 import sys
 import asyncio
@@ -20,7 +16,6 @@ import asyncio
 # Windows fix: Playwright needs SelectorEventLoop, not ProactorEventLoop
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
 
 import logging
 import os
@@ -53,6 +48,16 @@ logging.basicConfig(
 logger = logging.getLogger("adforge")
 
 settings = get_settings()
+
+# ─────────────────────────────────────────────────
+# Frontend path — React build output
+# In Docker: overridden by STATIC_FILES_PATH env var
+# In dev:    frontend-react/dist/ (after npm run build)
+# ─────────────────────────────────────────────────
+FRONTEND_DIST = Path(
+    os.getenv("STATIC_FILES_PATH", "")
+    or Path(__file__).parent.parent / "frontend-react" / "dist"
+)
 
 
 # ─────────────────────────────────────────────────
@@ -92,6 +97,15 @@ async def lifespan(app: FastAPI):
     app.state.rag_engine = rag_engine
     app.state.pipeline = pipeline
 
+    # Log frontend status
+    if FRONTEND_DIST.exists():
+        logger.info(f"Serving React frontend from: {FRONTEND_DIST}")
+    else:
+        logger.warning(
+            f"React build not found at {FRONTEND_DIST}. "
+            "Run: cd frontend-react && npm run build"
+        )
+
     logger.info(f"AdForge ready at http://{settings.host}:{settings.port}")
     yield
 
@@ -109,22 +123,26 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — allow all origins for local dev; restrict in production
+# CORS — allow React dev server on :3000 and production origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",   # React dev server
+        "http://localhost:8000",   # FastAPI serving built React
+        "*",                       # remove this in production
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Routers
+# API Routers — must be registered BEFORE the catch-all static route
 app.include_router(auth_router)
 app.include_router(pipeline_router)
 app.include_router(rag_router)
 
 
 # ─────────────────────────────────────────────────
-# Health & Root
+# Health
 # ─────────────────────────────────────────────────
 
 @app.get("/health", response_model=HealthResponse, tags=["system"])
@@ -137,27 +155,40 @@ async def health(request: Request):
     )
 
 
-@app.get("/", tags=["system"])
-async def root():
-    """Serve the frontend."""
-    frontend_path = Path(__file__).parent.parent / "frontend" / "index.html"
-    if frontend_path.exists():
-        return FileResponse(str(frontend_path))
+# ─────────────────────────────────────────────────
+# Serve React static assets (JS, CSS, images)
+# Vite puts them in dist/assets/
+# ─────────────────────────────────────────────────
+
+if FRONTEND_DIST.exists():
+    assets_dir = FRONTEND_DIST / "assets"
+    if assets_dir.exists():
+        app.mount(
+            "/assets",
+            StaticFiles(directory=str(assets_dir)),
+            name="assets",
+        )
+
+
+# ─────────────────────────────────────────────────
+# Catch-all: serve React index.html for all non-API routes
+# Required for React Router (client-side routing)
+# e.g. /dashboard, /login, /history all return index.html
+# ─────────────────────────────────────────────────
+
+@app.get("/{full_path:path}", tags=["system"])
+async def serve_react(full_path: str):
+    index = FRONTEND_DIST / "index.html"
+    if index.exists():
+        return FileResponse(str(index))
     return JSONResponse(
-        {"message": "AdForge API running. See /docs for API reference."}
+        status_code=200,
+        content={
+            "message": "AdForge API is running.",
+            "hint": "React frontend not built. Run: cd frontend-react && npm run build",
+            "docs": "/docs",
+        },
     )
-
-
-@app.get("/docs-redirect")
-async def docs():
-    from fastapi.responses import RedirectResponse
-    return RedirectResponse("/docs")
-
-
-# Mount static files if frontend dir exists
-frontend_dir = Path(__file__).parent.parent / "frontend"
-if frontend_dir.exists():
-    app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
 
 
 # ─────────────────────────────────────────────────

@@ -1,24 +1,75 @@
+# ── Stage 1: Build React Frontend ────────────────────────────────────────────
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /frontend
+
+# Copy package files first (better layer caching)
+COPY frontend-react/package*.json ./
+RUN npm ci --silent
+
+# Copy source and build
+COPY frontend-react/ ./
+RUN npm run build
+# Output is in /frontend/dist/
+
+
+# ── Stage 2: Build Python Dependencies ───────────────────────────────────────
+FROM python:3.11-slim AS backend-builder
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --prefix=/install --no-cache-dir -r requirements.txt
+
+
+# ── Stage 3: Final Production Image ──────────────────────────────────────────
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# System deps for Playwright
-RUN apt-get update && apt-get install -y \
-    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
-    libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
-    libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 \
-    libcairo2 libasound2 libxshmfence1 wget curl \
+# Runtime system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libxml2 \
+    libxslt1.1 \
+    libjpeg62-turbo \
+    libpng16-16 \
+    libwebp7 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN playwright install chromium --with-deps
+# Copy Python packages from builder
+COPY --from=backend-builder /install /usr/local
 
-COPY . .
+# Copy backend source code
+COPY backend/  ./backend/
+COPY llm/      ./llm/
+COPY rag/      ./rag/
+COPY scraper/  ./scraper/
 
-# Seed the RAG knowledge base on first run
-RUN python rag/seed_data.py || true
+# Copy built React app from frontend builder
+# FastAPI will serve this as static files
+COPY --from=frontend-builder /frontend/dist ./frontend/dist
+
+# Persistent data directories
+RUN mkdir -p /data/chroma_db /data/sqlite
+
+# Environment defaults
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    CHROMA_DB_PATH=/data/chroma_db \
+    SQLITE_DB_PATH=/data/sqlite/adforge.db \
+    STATIC_FILES_PATH=./frontend/dist \
+    HOST=0.0.0.0 \
+    PORT=8000
 
 EXPOSE 8000
 
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+CMD ["sh", "-c", "python rag/seed_data.py && uvicorn backend.main:app --host 0.0.0.0 --port 8000 --workers 1"]
